@@ -1,4 +1,5 @@
 import classes from './ProductItem.module.css';
+import ProductItemForm from './ProductItemForm';
 
 const ProductItem = (props) => {
 
@@ -12,7 +13,7 @@ const ProductItem = (props) => {
         <div className={classes.price}>{price}</div>
       </div>
       <div>
-          
+        <ProductItemForm />
       </div>
     </li>
   );
