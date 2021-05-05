@@ -1,42 +1,68 @@
+import { useEffect, useState } from "react";
+
 import Card from "../UI/Card";
-import classes from "./AvailableProducts.module.css";
 import ProductItem from "./ProductItem/ProductItem";
-
-const DUMMY_PRODUCTS = [
-  {
-    id: "p1",
-    name: "Masks",
-    description: "good quality masks",
-    price: 30,
-  },
-
-  {
-    id: "p2",
-    name: "Hand sanitizer",
-    description: "It contains alchohol use carefully",
-    price: 50,
-  },
-
-  {
-    id: "p3",
-    name: "Water Bottle",
-    description: "bottle for water",
-    price: 100,
-  },
-
-  {
-    id: "p4",
-    name: "guitar strings",
-    description: "good quality strings",
-    price: 300,
-  },
-];
+import classes from "./AvailableProducts.module.css";
 
 const AvailableProducts = () => {
-  const ProductList = DUMMY_PRODUCTS.map((product) => (
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [httpError, setHttpError] = useState();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const response = await fetch(
+        "https://react-eshop-22b8b-default-rtdb.firebaseio.com/products.json"
+      );
+
+      if (!response.ok) {
+        throw new Error("Something went wrong!");
+      }
+
+      const responseData = await response.json();
+
+      const loadedProducts = [];
+
+      for (const key in responseData) {
+        loadedProducts.push({
+          id: key,
+          name: responseData[key].name,
+          description: responseData[key].description,
+          price: responseData[key].price,
+        });
+      }
+
+      setProducts(loadedProducts);
+      setIsLoading(false);
+    };
+
+    
+    fetchProducts().catch((error) => {
+      setIsLoading(false);
+      setHttpError(error.message);
+    });
+  }, []);
+
+  if (isLoading) {
+    return (
+      <section className={classes.ProductsLoading}>
+        <p>Loading...</p>
+      </section>
+    );
+  }
+
+  if (httpError) {
+    return (
+      <section className={classes.ProductsError}>
+        <p>{httpError}</p>
+      </section>
+    );
+  }
+
+  const productsList = products.map((product) => (
     <ProductItem
-      id={product.id}
       key={product.id}
+      id={product.id}
       name={product.name}
       description={product.description}
       price={product.price}
@@ -46,7 +72,7 @@ const AvailableProducts = () => {
   return (
     <section className={classes.products}>
       <Card>
-        <ul>{ProductList}</ul>
+        <ul>{productsList}</ul>
       </Card>
     </section>
   );
